@@ -68,6 +68,7 @@
 #define FLAG_IF 46
 #define FLAG_DF 47
 #define FLAG_OF 48
+#define FLAG_XF 49 // always-zero flag (XF)
 
 // Lookup tables in the BIOS binary
 #define TABLE_XLAT_OPCODE 8

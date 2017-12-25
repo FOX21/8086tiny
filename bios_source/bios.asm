@@ -34,6 +34,7 @@ main:
 	jmp	bios_entry
 
 ; Here go pointers to the different data tables used for instruction decoding
+; Starting @ 0x81
 
 	dw	rm_mode12_reg1	; Table 0: R/M mode 1/2 "register 1" lookup
 	dw	rm_mode012_reg2	; Table 1: R/M mode 1/2 "register 2" lookup
@@ -83,9 +84,11 @@ bios_entry:
 	cld
 
 	xor	ax, ax
-	mov	di, 24
+	
+	mov	di, 24		; REG_ZERO 12
 	stosw			; Set ZS = 0
-	mov	di, 49
+	
+	mov	di, 49		; FLAG_XF 49
 	stosb			; Set XF = 0
 
 	; Now we can do whatever we want! DL starts off being the boot disk.
