@@ -140,18 +140,32 @@
 										  out_regs[i_w + 1] = (op_result = CAST(op_data_type)mem[rm_addr] * (op_data_type)*out_regs) >> 16, \
 										  regs16[REG_AX] = op_result, \
 										  set_OF(set_CF(op_result - (op_data_type)op_result)))
+
 #define DIV_MACRO(out_data_type,in_data_type,out_regs) (scratch_int = CAST(out_data_type)mem[rm_addr]) && !(scratch2_uint = (in_data_type)(scratch_uint = (out_regs[i_w+1] << 16) + regs16[REG_AX]) / scratch_int, scratch2_uint - (out_data_type)scratch2_uint) ? out_regs[i_w+1] = scratch_uint - scratch_int * (*out_regs = scratch2_uint) : pc_interrupt(0)
+
 #define DAA_DAS(op1,op2) \
 	set_AF((((scratch_uchar = regs8[REG_AL]) & 0x0F) > 9) || regs8[FLAG_AF]) && (op_result = (regs8[REG_AL] op1 6), set_CF(regs8[FLAG_CF] || (regs8[REG_AL] op2 scratch_uchar))), \
 	set_CF((regs8[REG_AL] > 0x9f) || regs8[FLAG_CF]) && (op_result = (regs8[REG_AL] op1 0x60))
+
 #define ADC_SBB_MACRO(a) OP(a##= regs8[FLAG_CF] +), \
 						 set_CF(regs8[FLAG_CF] && (op_result == op_dest) || (a op_result < a(int)op_dest)), \
 						 set_AF_OF_arith()
 
 // Execute arithmetic/logic operations in emulator memory/registers
-#define R_M_OP(dest,op,src) (i_w ? op_dest = CAST(unsigned short)dest, op_result = CAST(unsigned short)dest op (op_source = CAST(unsigned short)src) \
-								 : (op_dest = dest, op_result = dest op (op_source = CAST(unsigned char)src)))
+#define R_M_OP(dest,op,src) (i_w \
+	? \
+		op_dest = CAST(unsigned short)dest, \
+		op_source = CAST(unsigned short)src, \
+		op_result = op_dest op op_source \
+	: ( \
+		op_dest = dest,  \
+		op_source = CAST(unsigned char)src, \
+		op_result = dest op op_source \
+	) \
+)
+
 #define MEM_OP(dest,op,src) R_M_OP(mem[dest],op,mem[src])
+
 #define OP(op) MEM_OP(op_to_addr,op,op_from_addr)
 
 // Increment or decrement a register #reg_id (usually SI or DI), depending on direction flag and operand size (given by i_w)
@@ -159,6 +173,7 @@
 
 // Helpers for stack operations
 #define R_M_PUSH(a) (i_w = 1, R_M_OP(mem[SEGREG(REG_SS, REG_SP, --)], =, a))
+
 #define R_M_POP(a) (i_w = 1, regs16[REG_SP] += 2, R_M_OP(a, =, mem[SEGREG(REG_SS, REG_SP, -2+)]))
 
 // Convert segment:offset to linear address in emulator memory space
