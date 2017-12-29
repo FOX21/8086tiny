@@ -121,9 +121,21 @@
 
 // Decode mod, r_m and reg fields in instruction
 #define DECODE_RM_REG scratch2_uint = 4 * !i_mod, \
-					  op_to_addr = rm_addr = i_mod < 3 ? SEGREG(seg_override_en ? seg_override : bios_table_lookup[scratch2_uint + 3][i_rm], bios_table_lookup[scratch2_uint][i_rm], regs16[bios_table_lookup[scratch2_uint + 1][i_rm]] + bios_table_lookup[scratch2_uint + 2][i_rm] * i_data1+) : GET_REG_ADDR(i_rm), \
-					  op_from_addr = GET_REG_ADDR(i_reg), \
-					  i_d && (scratch_uint = op_from_addr, op_from_addr = rm_addr, op_to_addr = scratch_uint)
+	op_to_addr = rm_addr = \
+		i_mod < 3 \
+			? \
+				SEGREG(seg_override_en ?  seg_override : bios_table_lookup[scratch2_uint + 3][i_rm], \
+					bios_table_lookup[scratch2_uint][i_rm], \
+					regs16[bios_table_lookup[scratch2_uint + 1][i_rm]] + bios_table_lookup[scratch2_uint + 2][i_rm] * i_data1 + \
+					) \
+			: \
+				GET_REG_ADDR(i_rm), \
+				op_from_addr = GET_REG_ADDR(i_reg), \
+				i_d && ( \
+					scratch_uint = op_from_addr, \
+					op_from_addr = rm_addr, \
+					op_to_addr = scratch_uint \
+				)
 
 // Return memory-mapped register location (offset into mem array) for register #reg_id
 #define GET_REG_ADDR(reg_id) (REGS_BASE + (i_w ? 2 * reg_id : 2 * reg_id + reg_id / 4 & 7))
