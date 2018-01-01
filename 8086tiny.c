@@ -166,13 +166,12 @@
 // Execute arithmetic/logic operations in emulator memory/registers
 #define R_M_OP(dest,op,src) (i_w \
 	? \
-		op_dest = CAST(unsigned short)dest, \
-		op_source = CAST(unsigned short)src, \
-		op_result = op_dest op op_source \
+		op_dest = CAST(unsigned short)dest,
+		op_result = CAST(unsigned short)dest op (op_source = CAST(unsigned short)src) \
+		\
 	: ( \
-		op_dest = dest,  \
-		op_source = CAST(unsigned char)src, \
-		op_result = dest op op_source \
+		op_dest = dest,
+		op_result = dest op (op_source = CAST(unsigned char)src) \
 	) \
 )
 
