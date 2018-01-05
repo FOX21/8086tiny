@@ -222,7 +222,8 @@ boot:	mov	ax, 0
 	pop	ss
 	mov	sp, 0xf000
 	
-; Set up the IVT. First we zero out the table
+; Set up the Interrupt Vector Table (IVT). See int_table.
+; First we zero out the table
 
 	cld
 

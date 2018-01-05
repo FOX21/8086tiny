@@ -286,13 +286,22 @@ char pc_interrupt(unsigned char interrupt_num)
 	set_opcode(0xCD); // Decode like INT
 
 	make_flags();
-	R_M_PUSH(scratch_uint);
+	R_M_PUSH(scratch_uint); // Push Flags.
+	
+	// Push CS Register.
 	R_M_PUSH(regs16[REG_CS]);
+	
+	// Push IP Register.
 	R_M_PUSH(reg_ip);
+	
+	// Set new Code Segment register and Instruction Pointer register
+	// to the Interrupt address.
 	MEM_OP(REGS_BASE + 2 * REG_CS, =, 4 * interrupt_num + 2);
 	R_M_OP(reg_ip, =, mem[4 * interrupt_num]);
 
-	return regs8[FLAG_TF] = regs8[FLAG_IF] = 0;
+	regs8[FLAG_TF] = 0;
+	regs8[FLAG_IF] = 0;
+	return 0;
 }
 
 // AAA and AAS instructions - which_operation is +1 for AAA, and -1 for AAS
@@ -624,12 +633,16 @@ int main(int argc, char **argv)
 			OPCODE 19: // RET|RETF|IRET
 				i_d = i_w;
 				R_M_POP(reg_ip);
-				if (extra) // IRET|RETF|RETF imm16
+				if (extra){ // IRET|RETF|RETF imm16
 					R_M_POP(regs16[REG_CS]);
-				if (extra & 2) // IRET
+				}
+				if (extra & 2){ // IRET
+					// Restore Flags.
 					set_flags(R_M_POP(scratch_uint));
-				else if (!i_d) // RET|RETF imm16
+				}
+				else if (!i_d){ // RET|RETF imm16
 					regs16[REG_SP] += i_data0
+				}
 			OPCODE 20: // MOV r/m, immed
 				R_M_OP(mem[op_from_addr], =, i_data2)
 			OPCODE 21: // IN AL/AX, DX/imm8
