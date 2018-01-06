@@ -816,15 +816,19 @@ int main(int argc, char **argv)
 #endif
 
 		// Application has set trap flag, so fire INT 1
-		if (trap_flag)
+		if (trap_flag){
 			pc_interrupt(1);
+		}
 
 		trap_flag = regs8[FLAG_TF];
 
 		// If a timer tick is pending, interrupts are enabled, and no overrides/REP are active,
 		// then process the tick and check for new keystrokes
-		if (int8_asap && !seg_override_en && !rep_override_en && regs8[FLAG_IF] && !regs8[FLAG_TF])
-			pc_interrupt(0xA), int8_asap = 0, SDL_KEYBOARD_DRIVER;
+		if (int8_asap && !seg_override_en && !rep_override_en && regs8[FLAG_IF] && !regs8[FLAG_TF]){
+			pc_interrupt(0xA);
+			int8_asap = 0;
+			SDL_KEYBOARD_DRIVER;
+		}
 	}
 
 #ifndef NO_GRAPHICS
